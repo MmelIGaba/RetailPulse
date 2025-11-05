@@ -1,0 +1,53 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+jobs:
+  validate-branch:
+    name: Validate Branch Naming
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          if [[ "$BRANCH_NAME" != feature/* && "$BRANCH_NAME" != hotfix/* ]]; then
+            echo "❌ Branch name must start with 'feature/' or 'hotfix/'"
+            exit 1
+          fi
+          echo "✅ Branch name is valid: $BRANCH_NAME"
+
+  check-issue-link:
+    name: Check Issue Link
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure PR description links to an issue
+        run: |
+          BODY="${{ github.event.pull_request.body }}"
+          if [[ "$BODY" != *"Closes #"* && "$BODY" != *"Fixes #"* && "$BODY" != *"Resolves #"* ]]; then
+            echo "❌ Pull request must link to an issue using 'Closes #', 'Fixes #', or 'Resolves #'"
+            exit 1
+          fi
+          echo "✅ Issue link found in PR description"
+
+  run-ci:
+    name: Run CI Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint Python (backend)
+        run: |
+          pip install flake8
+          flake8 Back-End/etl/
+
+      - name: Lint Streamlit app
+        run: |
+          flake8 dashboard/
+
+      - name: Validate SQL files
+        run: |
+          grep -i "select" Back-End/sql/*.sql || echo "No SELECT statements found"
