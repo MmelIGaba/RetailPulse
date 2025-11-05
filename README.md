@@ -1,4 +1,4 @@
-# RetailPulse — SQL & ETL Data Pipeline Builder
+# RetailPulse : SQL & ETL Data Pipeline Builder
 
 RetailPulse is a full-stack data engineering project that demonstrates SQL proficiency, ETL pipeline development, and cloud integration. It extracts retail sales data from Kaggle, transforms it using Python, loads it into PostgreSQL, and visualizes results through a React dashboard. The project is modular, automated, and built for real-world data workflows.
 
