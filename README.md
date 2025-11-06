@@ -134,7 +134,8 @@ Visualize metrics with modern frontend tools.
 
 ## License
 
-This project is open-source under the MIT License. You may use, modify, and distribute it with attribution.
+This project is licensed under the [Apache License 2.0](LICENSE).
+
 
 ## Author
 
