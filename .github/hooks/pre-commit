@@ -1,0 +1,14 @@
+#!/bin/bash
+echo "🔍 Checking for new imports..."
+
+# Generate temp requirements from imports
+pipreqs . --force --ignore data,tests --savepath temp_requirements.txt
+
+# Merge new packages into requirements.txt
+if [ -f temp_requirements.txt ]; then
+  while read pkg; do
+    grep -qxF "$pkg" requirements.txt || echo "$pkg" >> requirements.txt
+  done < temp_requirements.txt
+  rm temp_requirements.txt
+  echo "✅ requirements.txt updated"
+fi
