@@ -1,0 +1,16 @@
+# Core ETL tools
+pandas
+numpy
+sqlalchemy
+psycopg2-binary
+python-dotenv
+
+# Streamlit dashboard
+streamlit
+plotly
+matplotlib
+seaborn
+
+# Optional utilities (recommended for production or automation)
+requests
+schedule
