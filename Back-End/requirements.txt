@@ -1,0 +1,5 @@
+pandas==2.3.3
+kaggle==1.7.4.5
+boto3==1.40.67
+sqlalchemy==2.0.44
+psycopg2==2.9.11
