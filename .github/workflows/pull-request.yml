@@ -20,6 +20,7 @@ jobs:
           fi
           echo "✅ Branch name is valid: $BRANCH_NAME"
 
+          
   check-issue-link:
     name: Check Issue Link
     runs-on: ubuntu-latest
@@ -33,21 +34,44 @@ jobs:
           fi
           echo "✅ Issue link found in PR description"
 
-  run-ci:
-    name: Run CI Checks
+  lint:
+    name: Lint Python Code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install flake8
+        run: pip install flake8
+      - name: Lint backend
+        run: flake8 Back-End/etl/
+      - name: Lint dashboard
+        run: flake8 Dashboard/
 
-      - name: Lint Python (backend)
-        run: |
-          pip install flake8
-          flake8 Back-End/etl/
+  test-etl:
+    name: Test ETL Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r Dashboard/requirements.txt
+      - name: Run ETL tests
+        run: pytest Back-End/etl/tests
 
-      - name: Lint Streamlit app
+  validate-sql:
+    name: Validate SQL Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check SQL files
         run: |
-          flake8 dashboard/
-
-      - name: Validate SQL files
-        run: |
-          grep -i "select" Back-End/sql/*.sql || echo "No SELECT statements found"
+          for file in Back-End/sql/*.sql; do
+            echo "Validating $file"
+            sqlite3 :memory: < "$file" || echo "Syntax error in $file"
+          done
