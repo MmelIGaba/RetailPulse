@@ -49,7 +49,6 @@ logs/
 # Raw data
 # data/raw/
 # *.csv
-# Add in prod
 
 # Python artifacts
 pycache/
