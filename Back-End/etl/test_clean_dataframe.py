@@ -1,25 +1,22 @@
+import os
 import pandas as pd
-from etl.transform import clean_dataframe  # Adjust import if needed
+import importlib
 
-# Sample data with nulls and duplicates
-data = {
-    'ProductID': ['A1', 'A2', None, 'A1', 'A3'],
-    'SaleAmount': [100, None, 200, 100, 300],
-    'Date': ['2022-01-01', '2022-01-02', '2022-01-03', '2022-01-01', '2022-01-04'],
-    'StoreID': ['S1', 'S2', 'S3', 'S1', 'S4']
-}
+etl_module = importlib.import_module("Back-End.etl.transform")
+config_module = importlib.import_module("Back-End.etl.transform_config")
 
-df = pd.DataFrame(data)
+clean_dataframe = getattr(etl_module, "clean_dataframe")
+TRANSFORM_CONFIG = getattr(config_module, "TRANSFORM_CONFIG")
 
-# Define cleaning rules
-required_columns = ['ProductID', 'SaleAmount']
-dedup_keys = ['ProductID', 'Date', 'StoreID']
+RAW_DIR = "data/raw"
 
-# Apply cleaning
-df_cleaned = clean_dataframe(df, required_columns, dedup_keys)
-
-# Show results
-print("Original DataFrame:")
-print(df)
-print("\nCleaned DataFrame:")
-print(df_cleaned)
+for filename in os.listdir(RAW_DIR):
+    if filename.endswith(".csv") and filename in TRANSFORM_CONFIG:
+        print(f"\n🔍 Testing: {filename}")
+        config = TRANSFORM_CONFIG[filename]
+        try:
+            df = pd.read_csv(os.path.join(RAW_DIR, filename))
+            df_cleaned = clean_dataframe(df, config["required_columns"], config["dedup_keys"])
+            print(f"✅ {filename}: {len(df_cleaned)} rows after cleaning")
+        except Exception as e:
+            print(f"❌ {filename}: Error during cleaning — {e}")
