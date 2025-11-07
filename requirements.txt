@@ -14,3 +14,4 @@ seaborn
 # Optional utilities (recommended for production or automation)
 requests
 schedule
+kagglehub[pandas-datasets]

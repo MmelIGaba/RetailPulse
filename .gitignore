@@ -39,3 +39,26 @@ Thumbs.db
 *.bak
 *.zip
 *.tar.gz
+
+Logs
+logs/
+*.log
+
+Raw data
+data/raw/
+*.csv
+
+Python artifacts
+pycache/
+.pyc
+
+Environment files
+.env
+.env.
+
+VS Code settings
+.vscode/
+
+OS-specific
+.DS_Store
+Thumbs.db
