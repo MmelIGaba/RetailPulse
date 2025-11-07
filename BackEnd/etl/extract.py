@@ -19,6 +19,7 @@ def ensure_raw_csv_exists():
 
         csv_files = [f for f in os.listdir(RAW_DIR) if f.endswith('.csv')]
 
+
         if not csv_files:
             logging.warning("No CSV file found in data/raw/")
             kggleURL = "https://www.kaggle.com/datasets/thedevastator/unlock-profits-with-e-commerce-sales-data"
