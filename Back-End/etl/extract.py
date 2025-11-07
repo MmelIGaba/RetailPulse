@@ -1,44 +1,47 @@
-# Install with: pip install kagglehub[pandas-datasets] python-dotenv
 import os
-import pandas as pd
-from dotenv import load_dotenv
-import kagglehub
-from kagglehub import KaggleDatasetAdapter
+import logging
 
-# Load environment variables
-load_dotenv()
+# Use os.path.join instead of hardcoded slashes
+RAW_DIR = os.path.join("data", "raw")
+LOG_DIR = "logs"
+LOG_FILE = os.path.join(LOG_DIR, "extract.log")
 
-# Set Kaggle credentials from .env
-os.environ["KAGGLE_USERNAME"] = os.getenv("KAGGLE_USERNAME")
-os.environ["KAGGLE_KEY"] = os.getenv("KAGGLE_KEY")
+# Ensure the log directory exists
+os.makedirs(LOG_DIR, exist_ok=True)
 
-# Dataset and file config
-DATASET = "thedevastator/unlock-profits-with-e-commerce-sales-data"
-FILE_NAME = "ecommerce_sales_dataset.csv"  # Adjust if needed
-RAW_DIR = "data/raw"
-RAW_PATH = os.path.join(RAW_DIR, FILE_NAME)
+# Configure logging
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
 
-def load_kaggle_dataset():
-    """Download and cache Kaggle dataset if not already saved locally."""
-    if not os.path.exists(RAW_DIR):
-        os.makedirs(RAW_DIR)
 
-    if os.path.exists(RAW_PATH):
-        print(f"📦 Found cached file: {RAW_PATH}")
-        df = pd.read_csv(RAW_PATH)
-    else:
-        print("⬇️ Downloading dataset from Kaggle...")
-        df = kagglehub.load_dataset(
-            KaggleDatasetAdapter.PANDAS,
-            DATASET,
-            FILE_NAME,
-        )
-        df.to_csv(RAW_PATH, index=False)
-        print(f"✅ Saved raw CSV to {RAW_PATH}")
+def ensure_raw_csv_exists():
+    kaggle_url = "https://www.kaggle.com/datasets/thedevastator/unlock-profits-with-e-commerce-sales-data"
 
-    print("🔍 First 5 records:")
-    print(df.head())
-    return df
+    try:
+        # Ensure raw data directory exists
+        os.makedirs(RAW_DIR, exist_ok=True)
+
+        # Find all CSV files (case-insensitive)
+        csv_files = [f for f in os.listdir(RAW_DIR) if f.lower().endswith(".csv")]
+
+        if not csv_files:
+            logging.warning("No CSV file found in data/raw/")
+            print("⚠️ No CSV file found in 'data/raw/'.")
+            print(
+                f"Please download the dataset from {kaggle_url} and place it in the '{RAW_DIR}' folder."
+            )
+            return False
+
+        logging.info(f"CSV file(s) found: {csv_files}")
+        return {"status": True, "files": csv_files}
+
+    except Exception as e:
+        logging.error(f"Error during CSV check: {e}")
+        return False
+
 
 if __name__ == "__main__":
-    load_kaggle_dataset()
+    ensure_raw_csv_exists()

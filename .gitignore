@@ -39,3 +39,20 @@ Thumbs.db
 *.bak
 *.zip
 *.tar.gz
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Raw data
+# data/raw/
+# *.csv
+# Add in prod
+
+# Python artifacts
+pycache/
+.pyc
+
+
