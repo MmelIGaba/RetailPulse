@@ -45,8 +45,8 @@ logs/
 *.log
 
 Raw data
-data/raw/
-*.csv
+# data/raw/
+# *.csv
 
 Python artifacts
 pycache/
