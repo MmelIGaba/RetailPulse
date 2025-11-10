@@ -17,7 +17,7 @@ RetailPulse simulates an enterprise-grade data workflow:
 ↓
 [Python ETL Pipeline]
 ↓
-[AWS S3 + PostgreSQL (RDS)]
+[Azure + PostgreSQL (RDS)]
 ↓
 [Flask/FastAPI API Layer]
 ↓
@@ -32,7 +32,7 @@ RetailPulse simulates an enterprise-grade data workflow:
 | --------------- | ------------------------------------------------------- |
 | ETL Pipeline    | Python 3.8+, pandas, kaggle, boto3, sqlalchemy, logging |
 | Database        | PostgreSQL (local or AWS RDS)                           |
-| Cloud Storage   | AWS S3                                                  |
+| Cloud Storage   | Azure Blob Storage S3                                                  |
 | API Layer       | Flask or FastAPI                                        |
 | Hosting         | Streamlit Cloud                                         |
 | Automation      | GitHub Actions, Cron jobs                               |
