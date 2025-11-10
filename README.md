@@ -8,7 +8,7 @@ RetailPulse simulates an enterprise-grade data workflow:
 
 1. **Extract** — Ingest open retail data from Kaggle.
 2. **Transform** — Clean, validate, and enrich using Python.
-3. **Load** — Store processed data in PostgreSQL and upload to AWS S3.
+3. **Load** — Store processed data in PostgreSQL and upload to Azure storage blob.
 4. **Visualize** — Serve analytics via API and Streamlit dashboard.
 
 ## Architecture
@@ -17,7 +17,7 @@ RetailPulse simulates an enterprise-grade data workflow:
 ↓
 [Python ETL Pipeline]
 ↓
-[AWS S3 + PostgreSQL (RDS)]
+[Azure S3 + PostgreSQL (RDS)]
 ↓
 [Flask/FastAPI API Layer]
 ↓
@@ -31,8 +31,8 @@ RetailPulse simulates an enterprise-grade data workflow:
 | Layer           | Tools & Libraries                                       |
 | --------------- | ------------------------------------------------------- |
 | ETL Pipeline    | Python 3.8+, pandas, kaggle, boto3, sqlalchemy, logging |
-| Database        | PostgreSQL (local or AWS RDS)                           |
-| Cloud Storage   | AWS S3                                                  |
+| Database        | PostgreSQL (local or Azure)                           |
+| Cloud Storage   | Azure storage blob                                                 |
 | API Layer       | Flask or FastAPI                                        |
 | Hosting         | Streamlit Cloud                                         |
 | Automation      | GitHub Actions, Cron jobs                               |
@@ -56,8 +56,8 @@ DB_HOST=your-db-host
 DB_USER=your-username
 DB_PASSWORD=your-password
 DB_NAME=retailpulse
-AWS_ACCESS_KEY=your-access-key
-AWS_SECRET_KEY=your-secret-key
+Azure_ACCESS_KEY=your-access-key
+Azure_SECRET_KEY=your-secret-key
 ```
 
 ## 3. Install Dependencies
@@ -126,7 +126,7 @@ Write and optimize SQL queries for analysis.
 
 Design modular ETL pipelines in Python.
 
-Integrate AWS storage and PostgreSQL.
+Integrate Azure storage and PostgreSQL.
 
 Automate data workflows using GitHub Actions.
 
