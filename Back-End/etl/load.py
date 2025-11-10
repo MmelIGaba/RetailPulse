@@ -22,7 +22,15 @@ AZURE_STORAGE_KEY = os.getenv("AZURE_STORAGE_KEY")
 CONTAINER_NAME = os.getenv("CONTAINER_NAME")
 BLOB_NAME = os.getenv("BLOB_NAME")
 
-LOCAL_FILE_PATH = os.getenv("LOCAL_FILE_PATH", "data/processed/your_file.csv")
+processed_dir = "../../data/processed"
+csv_files = [os.path.join(processed_dir, f) for f in os.listdir(processed_dir) if f.endswith(".csv")]
+
+if not csv_files:
+    raise FileNotFoundError("No CSV files found in data/processed directory.")
+
+# Get latest modified CSV file
+LOCAL_FILE_PATH = max(csv_files, key=os.path.getmtime)
+print(f"📂 Automatically selected CSV file: {LOCAL_FILE_PATH}")
 
 # ------------------------------------------------
 # 2. SETUP LOGGING
