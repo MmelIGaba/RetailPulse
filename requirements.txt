@@ -5,3 +5,8 @@ sqlalchemy
 psycopg2-binary
 python-dotenv
 
+# Streamlit dashboard
+streamlit
+plotly
+matplotlib
+seaborn
