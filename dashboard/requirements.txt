@@ -1,0 +1,5 @@
+# Streamlit dashboard
+streamlit
+plotly
+matplotlib
+seaborn
