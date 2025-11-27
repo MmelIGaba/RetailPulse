@@ -5,6 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 from datetime import datetime
+from pathlib import Path
 
 # ====================== PAGE CONFIG ======================
 st.set_page_config(
@@ -15,17 +16,27 @@ st.set_page_config(
 )
 
 # ====================== PATHS & AUTO DISCOVERY ======================
-BASE_DIR = r"C:\Users\mmeli\repositories\CloudCTRL\RetailPulse"
-PROCESSED_DIR = os.path.join(BASE_DIR, "data", "processed")
+from pathlib import Path
+
+# app.py is inside /dashboard
+APP_DIR = Path(__file__).resolve().parent
+BASE_DIR = APP_DIR.parent      # Repo root
+PROCESSED_DIR = BASE_DIR / "data" / "processed"
 
 def find_file(patterns):
-    if not os.path.exists(PROCESSED_DIR):
+    if not PROCESSED_DIR.exists():
         return None
+
     for p in [p.strip() for p in patterns.split("|")]:
-        matches = [f for f in os.listdir(PROCESSED_DIR) if p.lower() in f.lower()]
+        matches = [f for f in PROCESSED_DIR.iterdir()
+                   if p.lower() in f.name.lower()]
+
         if matches:
-            return os.path.join(PROCESSED_DIR, matches[0])
+            return str(matches[0])
+
     return None
+# Auto-discover files
+
 
 files = {
     "amazon": find_file("Amazon Sale Report"),
