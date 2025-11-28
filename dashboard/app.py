@@ -12,30 +12,28 @@ st.set_page_config(
     page_title="RetailPulse Pro - Ultimate Retail Analytics",
     page_icon="Shopping Cart",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 # ====================== PATHS & AUTO DISCOVERY ======================
-from pathlib import Path
 
-# app.py is inside /dashboard
-APP_DIR = Path(__file__).resolve().parent
-BASE_DIR = APP_DIR.parent      # Repo root
+# Streamlit always runs app from repo root
+BASE_DIR = Path(".").resolve()
 PROCESSED_DIR = BASE_DIR / "data" / "processed"
+
 
 def find_file(patterns):
     if not PROCESSED_DIR.exists():
+        st.warning("Processed data folder not found: data/processed")
         return None
 
     for p in [p.strip() for p in patterns.split("|")]:
-        matches = [f for f in PROCESSED_DIR.iterdir()
-                   if p.lower() in f.name.lower()]
+        matches = [f for f in PROCESSED_DIR.iterdir() if p.lower() in f.name.lower()]
 
         if matches:
             return str(matches[0])
 
     return None
-# Auto-discover files
 
 
 files = {
@@ -47,6 +45,7 @@ files = {
     "warehouse": find_file("Cloud Warehouse Compersion|warehouse"),
     "sale_report": find_file("Sale Report"),
 }
+
 
 @st.cache_data(ttl=3600)
 def load(path):
@@ -60,17 +59,22 @@ def load(path):
     st.warning(f"Could not read {os.path.basename(path)}")
     return pd.DataFrame()
 
+
 # Load everything
 amazon = load(files["amazon"])
-intl   = load(files["international"])
-may    = load(files["may2022"])
-pl     = load(files["pl_march"])
+intl = load(files["international"])
+may = load(files["may2022"])
+pl = load(files["pl_march"])
 expense = load(files["expense"])
 warehouse = load(files["warehouse"])
 
 # ====================== MERGE SALES DATA ======================
 df = pd.DataFrame()
-for data, source in [(amazon, "Amazon India"), (intl, "International"), (may, "May-2022")]:
+for data, source in [
+    (amazon, "Amazon India"),
+    (intl, "International"),
+    (may, "May-2022"),
+]:
     if not data.empty:
         temp = data.copy()
         temp["Source"] = source
@@ -82,7 +86,15 @@ if df.empty:
 
 # ====================== SMART COLUMN DETECTION ======================
 # Date column — try many possible names
-date_candidates = ["Date", "Order Date", "order_date", "date", "OrderDate", "ship-date", "Date "]
+date_candidates = [
+    "Date",
+    "Order Date",
+    "order_date",
+    "date",
+    "OrderDate",
+    "ship-date",
+    "Date ",
+]
 date_col = next((col for col in date_candidates if col in df.columns), None)
 
 if date_col:
@@ -148,36 +160,50 @@ if df["Date"].notna().any():
         "Date Range",
         min_value=df["Date"].min().date(),
         max_value=df["Date"].max().date(),
-        value=(df["Date"].min().date(), df["Date"].max().date())
+        value=(df["Date"].min().date(), df["Date"].max().date()),
     )
     df = df[
-        (df["Date"] >= pd.Timestamp(date_range[0])) &
-        (df["Date"] <= pd.Timestamp(date_range[1]))
+        (df["Date"] >= pd.Timestamp(date_range[0]))
+        & (df["Date"] <= pd.Timestamp(date_range[1]))
     ]
 
 
 # Other filters
 if "Category" in df.columns:
-    cat_filter = st.sidebar.multiselect("Category", options=sorted(df["Category"].dropna().unique()))
+    cat_filter = st.sidebar.multiselect(
+        "Category", options=sorted(df["Category"].dropna().unique())
+    )
     if cat_filter:
         df = df[df["Category"].isin(cat_filter)]
 
 if "State" in df.columns:
-    state_filter = st.sidebar.multiselect("State", options=sorted(df["State"].dropna().unique()))
+    state_filter = st.sidebar.multiselect(
+        "State", options=sorted(df["State"].dropna().unique())
+    )
     if state_filter:
         df = df[df["State"].isin(state_filter)]
 
-source_filter = st.sidebar.multiselect("Source", options=df["Source"].unique(), default=df["Source"].unique())
+source_filter = st.sidebar.multiselect(
+    "Source", options=df["Source"].unique(), default=df["Source"].unique()
+)
 df = df[df["Source"].isin(source_filter)]
 
 # ====================== KPIs ======================
 c1, c2, c3, c4, c5 = st.columns(5)
-with c1: st.metric("Total Revenue", f"₹{df['Revenue'].sum():,.0f}")
-with c2: st.metric("Total Orders", f"{len(df):,}")
-with c3: st.metric("Units Sold", f"{df['Qty'].sum():,.0f}")
-with c4: st.metric("AOV", f"₹{df['Revenue'].sum()/len(df):,.0f}" if len(df) else 0)
+with c1:
+    st.metric("Total Revenue", f"₹{df['Revenue'].sum():,.0f}")
+with c2:
+    st.metric("Total Orders", f"{len(df):,}")
+with c3:
+    st.metric("Units Sold", f"{df['Qty'].sum():,.0f}")
+with c4:
+    st.metric("AOV", f"₹{df['Revenue'].sum()/len(df):,.0f}" if len(df) else 0)
 with c5:
-    cancelled = len(df[df["Status"].str.contains("Cancel|Return", case=False, na=False)]) if "Status" in df.columns else 0
+    cancelled = (
+        len(df[df["Status"].str.contains("Cancel|Return", case=False, na=False)])
+        if "Status" in df.columns
+        else 0
+    )
     st.metric("Cancelled", f"{cancelled:,}")
 
 # ====================== CHARTS (safe versions) ======================
@@ -190,14 +216,21 @@ with r1[0]:
     st.subheader("Monthly Revenue")
     monthly = df.groupby("MonthName")["Revenue"].sum().reset_index()
     monthly = monthly.sort_values("MonthName")
-    fig = px.line(monthly, x="MonthName", y="Revenue", markers=True, title="Revenue Trend")
+    fig = px.line(
+        monthly, x="MonthName", y="Revenue", markers=True, title="Revenue Trend"
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 # Category sales
 with r1[1]:
     st.subheader("Sales by Category")
     if "Category" in df.columns:
-        cat = df.groupby("Category")["Revenue"].sum().sort_values(ascending=False).head(10)
+        cat = (
+            df.groupby("Category")["Revenue"]
+            .sum()
+            .sort_values(ascending=False)
+            .head(10)
+        )
         fig = px.bar(cat, color=cat.index, text_auto=True)
         st.plotly_chart(fig, use_container_width=True)
 
@@ -206,31 +239,50 @@ with r2[0]:
     st.subheader("Sales by State")
     if "State" in df.columns:
         state_sales = df.groupby("State")["Revenue"].sum().reset_index()
-        fig = px.choropleth(state_sales, locations="State", locationmode="country names",
-                            color="Revenue", scope="asia", color_continuous_scale="Reds")
+        fig = px.choropleth(
+            state_sales,
+            locations="State",
+            locationmode="country names",
+            color="Revenue",
+            scope="asia",
+            color_continuous_scale="Reds",
+        )
         fig.update_geos(fitbounds="locations", visible=False)
         st.plotly_chart(fig, use_container_width=True)
 
 # Top products
 with r2[1]:
     st.subheader("Top 10 Products")
-    prod_col = "Style" if "Style" in df.columns else "SKU" if "SKU" in df.columns else None
+    prod_col = (
+        "Style" if "Style" in df.columns else "SKU" if "SKU" in df.columns else None
+    )
     if prod_col:
         top = df.groupby(prod_col)["Revenue"].sum().nlargest(10)
         fig = px.bar(top, orientation="h")
         st.plotly_chart(fig, use_container_width=True)
 
 # Download
-st.download_button("Download Filtered Data", df.to_csv(index=False), "retailpulse_filtered.csv", "text/csv")
+st.download_button(
+    "Download Filtered Data",
+    df.to_csv(index=False),
+    "retailpulse_filtered.csv",
+    "text/csv",
+)
 
 # Raw tabs
 st.markdown("---")
 tabs = st.tabs(["Amazon", "International", "May-2022", "P&L", "Expense", "Warehouse"])
-with tabs[0]: st.dataframe(amazon.head(100), use_container_width=True)
-with tabs[1]: st.dataframe(intl.head(100), use_container_width=True)
-with tabs[2]: st.dataframe(may.head(100), use_container_width=True)
-with tabs[3]: st.dataframe(pl, use_container_width=True)
-with tabs[4]: st.dataframe(expense, use_container_width=True)
-with tabs[5]: st.dataframe(warehouse, use_container_width=True)
+with tabs[0]:
+    st.dataframe(amazon.head(100), use_container_width=True)
+with tabs[1]:
+    st.dataframe(intl.head(100), use_container_width=True)
+with tabs[2]:
+    st.dataframe(may.head(100), use_container_width=True)
+with tabs[3]:
+    st.dataframe(pl, use_container_width=True)
+with tabs[4]:
+    st.dataframe(expense, use_container_width=True)
+with tabs[5]:
+    st.dataframe(warehouse, use_container_width=True)
 
 st.success("RetailPulse Pro Dashboard is LIVE!")
